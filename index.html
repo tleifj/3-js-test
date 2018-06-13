@@ -5,7 +5,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
-			body {
+			/* body {
 				font-family: Monospace;
 				background-color: #000000;
 				margin: 0px;
@@ -28,19 +28,19 @@
 
 				color: #0040ff;
 
-			}
+			} */
 		</style>
 	</head>
 	<body>
+        <canvas id="my-canvas"></canvas>
+		<script src="./js/three.js"></script>
 
-		<script src="../build/three.js"></script>
+		<script src='./js/dat.gui.min.js'></script>
 
-		<script src='js/libs/dat.gui.min.js'></script>
+		<script src="./js/Detector.js"></script>
+		<script src="./js/stats.min.js"></script>
 
-		<script src="js/Detector.js"></script>
-		<script src="js/libs/stats.min.js"></script>
-
-		<script id="vs" type="x-shader/x-vertex">
+		<!-- <script id="vs" type="x-shader/x-vertex">
 
 			uniform sampler2D map;
 
@@ -78,9 +78,9 @@
 
 			}
 
-		</script>
+		</script> -->
 
-		<script id="fs" type="x-shader/x-fragment">
+		<!-- <script id="fs" type="x-shader/x-fragment">
 
 			uniform sampler2D map;
 
@@ -93,163 +93,204 @@
 
 			}
 
-		</script>
+		</script> -->
 
 		<script>
 
-			var container;
+            var renderer = new THREE.WebGLRenderer({canvas: document.getElementById("my-canvas"), antialias: true});
 
-			var scene, camera, light, renderer;
-			var geometry, cube, mesh, material;
-			var mouse, center;
-			var stats;
+            renderer.setClearColor(0x000000);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
 
-			var video, texture;
+            var camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 3000);
 
-			if ( Detector.webgl ) {
+            var scene = new THREE.Scene();
 
-				init();
-				animate();
+            var light = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(light);
 
-			} else {
+            var light1 = new THREE.PointLight(0xffffff, 0.5);
+            scene.add(light1);
 
-				document.body.appendChild( Detector.getWebGLErrorMessage() );
+            var geometry = new THREE.CubeGeometry(100, 100, 100);
+            var material = new THREE.MeshLambertMaterial({color: 0xffffff});
+            var mesh1 = new THREE.Mesh(geometry, material);
+            mesh1.position.set(0,0,-1000);
 
-			}
+            scene.add(mesh1);
 
-			function init() {
+            var mesh2 = new THREE.Mesh(geometry, material);
+            mesh2.position.set(-300,-500,-2000);
 
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
+            scene.add(mesh2);
 
-				var info = document.createElement( 'div' );
-				info.id = 'info';
-				info.innerHTML = '<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - kinect';
-				document.body.appendChild( info );
+            
 
-				stats = new Stats();
-				// container.appendChild( stats.dom );
+            requestAnimationFrame(render);
+            function render() {
+                mesh1.rotation.x += 0.05;
+                mesh1.rotation.y += 0.05;
 
-				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 10000 );
-				camera.position.set( 0, 0, 500 );
+                mesh2.rotation.x += 0.05;
+                mesh2.rotation.y += 0.05;
+                renderer.render(scene, camera);
+                requestAnimationFrame(render);
+            }
+            
+			// var container;
 
-				scene = new THREE.Scene();
-				center = new THREE.Vector3();
-				center.z = - 1000;
+			// var scene, camera, light, renderer;
+			// var geometry, cube, mesh, material;
+			// var mouse, center;
+			// var stats;
 
-				video = document.createElement( 'video' );
-				video.addEventListener( 'loadedmetadata', function ( event ) {
+			// var video, texture;
 
-					texture = new THREE.VideoTexture( video );
-					texture.minFilter = THREE.NearestFilter;
-					texture.format = THREE.RGBFormat;
+			// if ( Detector.webgl ) {
 
-					var width = 640, height = 480;
-					var nearClipping = 850, farClipping = 4000;
+			// 	init();
+			// 	animate();
 
-					geometry = new THREE.BufferGeometry();
+			// } else {
 
-					var vertices = new Float32Array( width * height * 3 );
+			// 	document.body.appendChild( Detector.getWebGLErrorMessage() );
 
-					for ( var i = 0, j = 0, l = vertices.length; i < l; i += 3, j ++ ) {
+			// }
 
-						vertices[ i ] = j % width;
-						vertices[ i + 1 ] = Math.floor( j / width );
+			// function init() {
 
-					}
+			// 	container = document.createElement( 'div' );
+			// 	document.body.appendChild( container );
 
-					geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+			// 	var info = document.createElement( 'div' );
+			// 	info.id = 'info';
+			// 	info.innerHTML = '<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - kinect';
+			// 	document.body.appendChild( info );
 
-					material = new THREE.ShaderMaterial( {
+			// 	stats = new Stats();
+			// 	// container.appendChild( stats.dom );
 
-						uniforms: {
+			// 	camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 10000 );
+			// 	camera.position.set( 0, 0, 500 );
 
-							"map":          { value: texture },
-							"width":        { value: width },
-							"height":       { value: height },
-							"nearClipping": { value: nearClipping },
-							"farClipping":  { value: farClipping },
+			// 	scene = new THREE.Scene();
+			// 	center = new THREE.Vector3();
+			// 	center.z = - 1000;
 
-							"pointSize":    { value: 2 },
-							"zOffset":      { value: 1000 }
+			// 	video = document.createElement( 'video' );
+			// 	video.addEventListener( 'loadedmetadata', function ( event ) {
 
-						},
-						vertexShader: document.getElementById( 'vs' ).textContent,
-						fragmentShader: document.getElementById( 'fs' ).textContent,
-						blending: THREE.AdditiveBlending,
-						depthTest: false, depthWrite: false,
-						transparent: true
+			// 		texture = new THREE.VideoTexture( video );
+			// 		texture.minFilter = THREE.NearestFilter;
+			// 		texture.format = THREE.RGBFormat;
 
-					} );
+			// 		var width = 640, height = 480;
+			// 		var nearClipping = 850, farClipping = 4000;
 
-					mesh = new THREE.Points( geometry, material );
-					scene.add( mesh );
+			// 		geometry = new THREE.BufferGeometry();
 
-					var gui = new dat.GUI();
-					gui.add( material.uniforms.nearClipping, 'value', 1, 10000, 1.0 ).name( 'nearClipping' );
-					gui.add( material.uniforms.farClipping, 'value', 1, 10000, 1.0 ).name( 'farClipping' );
-					gui.add( material.uniforms.pointSize, 'value', 1, 10, 1.0 ).name( 'pointSize' );
-					gui.add( material.uniforms.zOffset, 'value', 0, 4000, 1.0 ).name( 'zOffset' );
-					gui.close();
+			// 		var vertices = new Float32Array( width * height * 3 );
+
+			// 		for ( var i = 0, j = 0, l = vertices.length; i < l; i += 3, j ++ ) {
+
+			// 			vertices[ i ] = j % width;
+			// 			vertices[ i + 1 ] = Math.floor( j / width );
+
+			// 		}
+
+			// 		geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+
+			// 		material = new THREE.ShaderMaterial( {
+
+			// 			uniforms: {
+
+			// 				"map":          { value: texture },
+			// 				"width":        { value: width },
+			// 				"height":       { value: height },
+			// 				"nearClipping": { value: nearClipping },
+			// 				"farClipping":  { value: farClipping },
+
+			// 				"pointSize":    { value: 2 },
+			// 				"zOffset":      { value: 1000 }
+
+			// 			},
+			// 			vertexShader: document.getElementById( 'vs' ).textContent,
+			// 			fragmentShader: document.getElementById( 'fs' ).textContent,
+			// 			blending: THREE.AdditiveBlending,
+			// 			depthTest: false, depthWrite: false,
+			// 			transparent: true
+
+			// 		} );
+
+			// 		mesh = new THREE.Points( geometry, material );
+			// 		scene.add( mesh );
+
+			// 		var gui = new dat.GUI();
+			// 		gui.add( material.uniforms.nearClipping, 'value', 1, 10000, 1.0 ).name( 'nearClipping' );
+			// 		gui.add( material.uniforms.farClipping, 'value', 1, 10000, 1.0 ).name( 'farClipping' );
+			// 		gui.add( material.uniforms.pointSize, 'value', 1, 10, 1.0 ).name( 'pointSize' );
+			// 		gui.add( material.uniforms.zOffset, 'value', 0, 4000, 1.0 ).name( 'zOffset' );
+			// 		gui.close();
 
 
-				}, false );
-				video.crossOrigin = 'anonymous';
-				video.loop = true;
-				video.muted = true;
-				video.src = 'textures/kinect.webm';
-				video.setAttribute( 'webkit-playsinline', 'webkit-playsinline' );
-				video.play();
+			// 	}, false );
+			// 	video.crossOrigin = 'anonymous';
+			// 	video.loop = true;
+			// 	video.muted = true;
+			// 	video.src = './textures/kinect.webm';
+			// 	video.setAttribute( 'webkit-playsinline', 'webkit-playsinline' );
+			// 	video.play();
 
-				renderer = new THREE.WebGLRenderer();
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				container.appendChild( renderer.domElement );
+			// 	renderer = new THREE.WebGLRenderer();
+			// 	renderer.setPixelRatio( window.devicePixelRatio );
+			// 	renderer.setSize( window.innerWidth, window.innerHeight );
+			// 	container.appendChild( renderer.domElement );
 
-				mouse = new THREE.Vector3( 0, 0, 1 );
+			// 	mouse = new THREE.Vector3( 0, 0, 1 );
 
-				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+			// 	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
-				//
+			// 	//
 
-				window.addEventListener( 'resize', onWindowResize, false );
+			// 	window.addEventListener( 'resize', onWindowResize, false );
 
-			}
+			// }
 
-			function onWindowResize() {
+			// function onWindowResize() {
 
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
+			// 	camera.aspect = window.innerWidth / window.innerHeight;
+			// 	camera.updateProjectionMatrix();
 
-				renderer.setSize( window.innerWidth, window.innerHeight );
+			// 	renderer.setSize( window.innerWidth, window.innerHeight );
 
-			}
+			// }
 
-			function onDocumentMouseMove( event ) {
+			// function onDocumentMouseMove( event ) {
 
-				mouse.x = ( event.clientX - window.innerWidth / 2 ) * 8;
-				mouse.y = ( event.clientY - window.innerHeight / 2 ) * 8;
+			// 	mouse.x = ( event.clientX - window.innerWidth / 2 ) * 8;
+			// 	mouse.y = ( event.clientY - window.innerHeight / 2 ) * 8;
 
-			}
+			// }
 
-			function animate() {
+			// function animate() {
 
-				requestAnimationFrame( animate );
+			// 	requestAnimationFrame( animate );
 
-				render();
-				stats.update();
+			// 	render();
+			// 	stats.update();
 
-			}
+			// }
 
-			function render() {
+			// function render() {
 
-				camera.position.x += ( mouse.x - camera.position.x ) * 0.05;
-				camera.position.y += ( - mouse.y - camera.position.y ) * 0.05;
-				camera.lookAt( center );
+			// 	camera.position.x += ( mouse.x - camera.position.x ) * 0.05;
+			// 	camera.position.y += ( - mouse.y - camera.position.y ) * 0.05;
+			// 	camera.lookAt( center );
 
-				renderer.render( scene, camera );
+			// 	renderer.render( scene, camera );
 
-			}
+			// }
 
 		</script>
 	</body>
